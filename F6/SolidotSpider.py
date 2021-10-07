@@ -127,6 +127,7 @@ class SolidotSpider(_BasePeriod):
     async def enter_loop(self, *, bot):
         while True:
             await self.main(bot=bot)
+            logging.info(f"(F6.SolidotSpider, enter_loop) Main done, start to wait for {self.repeat_time} sec.")
             await asyncio.sleep(self.repeat_time)
 
 
