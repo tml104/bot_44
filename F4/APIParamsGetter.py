@@ -30,3 +30,11 @@ class APIParamsGetter:
                 raise ValueError("event is not Event.GroupMessageEvent.")
             group_id = event.group_id
             return APIParams.SendGroupMsg(group_id=group_id, message=message)
+
+    @staticmethod
+    async def get_send_apiparams_by_group_id(message: Message.Message, group_id:int, *, bot) -> APIParams.APIParams:
+        return APIParams.SendGroupMsg(group_id=group_id, message=message)
+
+    @staticmethod
+    async def get_send_apiparams_by_user_id(message: Message.Message, user_id:int, *, bot) -> APIParams.APIParams:
+        return APIParams.SendPrivateMsg(user_id=user_id, message=message)

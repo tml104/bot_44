@@ -13,6 +13,7 @@ import F2.Event as Event
 import F2.APIParams as APIParams
 from F1.CommandLoader import CommandLoader
 import F3.EventDeliverer as EventDeliverer
+from F4.APIParamsGetter import APIParamsGetter
 
 '''
     ws_url='http://127.0.0.1:6700/event'
@@ -86,6 +87,18 @@ class Bot:
 
         await self.ws2.send_json(d)
 
+    async def start_callback(self):
+        """
+        启动Bot回调，目前只是硬编码地发送一句话。
+
+        :return:
+        """
+        res = await APIParamsGetter.get_send_apiparams_by_group_id(
+            message=Message.init_with_segments(MessageSegment.text("bot_44 准备就绪.")),
+            group_id=491959457
+        )
+        await self.call_api(res)
+
     async def receiver_loop(self):
         """
         事件循环，开始不断监听Event。
@@ -95,11 +108,12 @@ class Bot:
         logging.info("(F1.Bot, receiver_loop) Bot receiver_loop started.")
         async for msg in self.ws1:
             if msg.type == aiohttp.WSMsgType.TEXT:
-                logging.debug("Received event.")
-                logging.debug(msg.data)
                 j=json.loads(msg.data)
                 # 获取event
                 event = await self.__json_to_event(j)
+                if event.post_type != 'meta_event':
+                    logging.debug("Received event.")
+                    logging.debug(msg.data)
                 # Event转交给F3层处理
                 try:
                     res = await EventDeliverer.EventDeliverer.handle_event(event, bot=self)
@@ -119,6 +133,7 @@ class Bot:
         self.ws2 = await self.ses.ws_connect(self.ws_url2)
         logging.info("(F1.Bot, enter_loop) Bot successfully created ws1 and ws2.")
         # self.receiver_future = asyncio.create_task(self.receiver_loop())
+
         await self.receiver_loop()
         # logging.info("(F1.Bot) Bot successfully created receiver task.")
 
