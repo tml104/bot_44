@@ -1,0 +1,9 @@
+DEBUG , 2021-10-06 18:11:10,660: Using proactor: IocpProactor
+ERROR , 2021-10-06 18:11:10,693: Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000002BA7AEB0130>
+DEBUG , 2021-10-06 18:12:04,835: Using proactor: IocpProactor
+INFO , 2021-10-06 18:12:04,843: CommandLoader load finished.
+INFO , 2021-10-06 18:12:04,865: Bot successfully created ws1 and ws1.
+INFO , 2021-10-06 18:12:04,865: Bot successfully created receiver task.
+DEBUG , 2021-10-06 18:12:04,865: Received event.
+DEBUG , 2021-10-06 18:12:04,865: {"_post_method":2,"meta_event_type":"lifecycle","post_type":"meta_event","self_id":643681265,"sub_type":"connect","time":1633508407}
