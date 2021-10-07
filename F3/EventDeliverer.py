@@ -26,6 +26,7 @@ class EventDeliverer:
         :param bot:
         :return:
         """
+        logging.info("(F3.EventDeliverer, deliver_message_event) Start Handling of MessageEvent.")
 
         try:
             res = await MessageEventHandler.MessageEventHandler.handle_message_event(
@@ -37,7 +38,7 @@ class EventDeliverer:
             from F4.APIParamsGetter import APIParamsGetter
             res = await APIParamsGetter.get_send_apiparams(
                 Message.Message.init_with_segments(
-                    Message.MessageSegment.text("（F3.EventDeliverer, deliver_message_event）消息事件处理错误：尝试处理事件时遇到了异常.\n"),
+                    Message.MessageSegment.text("(F3.EventDeliverer, deliver_message_event) 消息事件处理错误：尝试处理事件时遇到了异常.\n"),
                     Message.MessageSegment.text(traceback.format_exc())
                 ),
                 event,

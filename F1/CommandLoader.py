@@ -8,6 +8,7 @@ import aiohttp
 import importlib
 import os.path
 import logging
+import inspect
 
 from F2.Message import Message, MessageSegment
 from F2.Event import *
@@ -26,8 +27,8 @@ class CommandLoader:
         self.command_dict = self.load_commands()
 
     def load_commands(self):
+        logging.info("(F1.CommandLoader, load_commands) CommandLoader load started.")
         d = {}
-
         for module_file in os.listdir(self.base_path):
             # 去除后缀
             module_name = os.path.splitext(module_file)[0]
@@ -36,9 +37,11 @@ class CommandLoader:
                 continue
 
             module = importlib.import_module(self.base_path.replace('/','.') + module_name)
-            d.update({x:y for x,y in module.__dict__.items() if x[:1]!='_'})
+            # d.update({x:y for x,y in module.__dict__.items() if x[:1]!='_' and inspect.isfunction(y)})
+            d.update(inspect.getmembers(module, inspect.isfunction))
 
-        logging.info("CommandLoader load finished.")
+        logging.info(f"(F1.CommandLoader, load_commands) CommandLoader load finished. {len(d)} command(s) were loaded.")
+        logging.info(f"(F1.CommandLoader, load_commands) d: {d}")
         return d
 
     def reload(self):

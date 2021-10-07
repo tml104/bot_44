@@ -1,7 +1,6 @@
 import json
 
 from pydantic import BaseModel
-from typing import *
 
 import asyncio
 import aiohttp
@@ -15,7 +14,7 @@ import F2.Message as Message
 import sympy
 
 
-async def help(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
+async def h(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
     """
         显示所有命令的帮助信息。
     """

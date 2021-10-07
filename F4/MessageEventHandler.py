@@ -60,12 +60,16 @@ class MessageEventHandler:
         :param bot:
         :return:
         """
+        logging.info("(F4.MessageEventHandler, handle_message_as_command) Start Handling of MessageEvent as command.")
+
         # 判断message的第一个messagesegment是否是在at自己
         first_message_segment = message[0]
         at_me_flag = False
         # 是at自己的
         if first_message_segment.type == 'at' and first_message_segment.data['qq'] == bot.qqid:
             at_me_flag = True
+
+        logging.info(f"(F4.MessageEventHandler, handle_message_as_command) at_me_flag == {at_me_flag}.")
 
         # message中有at me，触发指令判断
         if at_me_flag:
@@ -95,6 +99,7 @@ class MessageEventHandler:
                     bot=bot
                 )
             # 否则能找到，用await调用之，返回一个message
+            logging.info(f"(F4.MessageEventHandler, handle_message_as_command) Command found, name is {command_name}.")
             msg = await fun(regular_message, event, bot=bot)
             # 返回对应apiparams
             return await APIParamsGetter.get_send_apiparams(

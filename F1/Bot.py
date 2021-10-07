@@ -92,7 +92,7 @@ class Bot:
 
         :return:
         """
-
+        logging.info("(F1.Bot, receiver_loop) Bot receiver_loop started.")
         async for msg in self.ws1:
             if msg.type == aiohttp.WSMsgType.TEXT:
                 logging.debug("Received event.")
@@ -106,7 +106,7 @@ class Bot:
                     await self.call_api(res)
                     # 得到F3层的APIParams返回值，选择调用API
                 except Exception as e:
-                    logging.error("(F1.Bot) Exception occurred during trying to handle event.", exc_info=True)
+                    logging.error("(F1.Bot, receiver_loop) Exception occurred during trying to handle event.", exc_info=True)
 
     async def enter_loop(self):
         """
@@ -117,19 +117,19 @@ class Bot:
 
         self.ws1 = await self.ses.ws_connect(self.ws_url)
         self.ws2 = await self.ses.ws_connect(self.ws_url2)
-        logging.info("(F1.Bot) Bot successfully created ws1 and ws1.")
+        logging.info("(F1.Bot, enter_loop) Bot successfully created ws1 and ws2.")
         # self.receiver_future = asyncio.create_task(self.receiver_loop())
         await self.receiver_loop()
         # logging.info("(F1.Bot) Bot successfully created receiver task.")
 
     async def close(self):
         """
-        关闭事件循环
+        关闭事件循环，这个函数目前没用
 
         :return:
         """
 
-        self.receiver_future.cancel()
+        # self.receiver_future.cancel()
         await self.ws1.close()
         await self.ws2.close()
         logging.info("(F1.Bot) Bot successfully closed.")
