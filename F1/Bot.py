@@ -12,6 +12,7 @@ from F2.Message import Message, MessageSegment
 import F2.Event as Event
 import F2.APIParams as APIParams
 from F1.CommandLoader import CommandLoader
+from F1.PeriodLoader import PeriodLoader
 import F3.EventDeliverer as EventDeliverer
 from F4.APIParamsGetter import APIParamsGetter
 
@@ -23,7 +24,7 @@ from F4.APIParamsGetter import APIParamsGetter
 '''
 
 class Bot:
-    def __init__(self, ws_url:str, ws_url2:str, qqid:str, cmd_loader_base_path:str):
+    def __init__(self, ws_url:str, ws_url2:str, qqid:str, cmd_loader_base_path:str ,period_loader_path:str ):
         """
         构造Bot对象，用于启动事件循环接受事件。
 
@@ -33,6 +34,7 @@ class Bot:
         """
         self.ses = aiohttp.ClientSession()
         self.cmd_loader = CommandLoader(cmd_loader_base_path)
+        self.period_loader = PeriodLoader(period_loader_path)
         self.ws_url = ws_url
         self.ws_url2 = ws_url2
         self.qqid = qqid
@@ -93,9 +95,10 @@ class Bot:
 
         :return:
         """
-        res = await APIParamsGetter.get_send_apiparams_by_group_id(
+        res = await APIParamsGetter.get_send_apiparams_by_user_id(
             message=Message.init_with_segments(MessageSegment.text("bot_44 准备就绪.")),
-            group_id=491959457
+            user_id=1041159637,
+            bot=self
         )
         await self.call_api(res)
 
@@ -133,8 +136,11 @@ class Bot:
         self.ws2 = await self.ses.ws_connect(self.ws_url2)
         logging.info("(F1.Bot, enter_loop) Bot successfully created ws1 and ws2.")
         # self.receiver_future = asyncio.create_task(self.receiver_loop())
+        await self.start_callback()
 
+        period_task = asyncio.create_task(self.period_loop())
         await self.receiver_loop()
+        await period_task #?
         # logging.info("(F1.Bot) Bot successfully created receiver task.")
 
     async def close(self):
@@ -148,6 +154,15 @@ class Bot:
         await self.ws1.close()
         await self.ws2.close()
         logging.info("(F1.Bot) Bot successfully closed.")
+
+    async def period_loop(self):
+        logging.info("(F1.Bot, period_loop) Start period_loop.")
+        coro_tasks_ls = []
+        for cls in self.period_loader.class_dict.values():
+            inst = await cls.create()
+            coro_tasks_ls.append(asyncio.create_task(inst.enter_loop(bot=self)))
+
+        logging.info(f"(F1.Bot, period_loop) Period_loop tasks created. coro_tasks_ls: {coro_tasks_ls}")
 
 
 if __name__ == '__main__':
