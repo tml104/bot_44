@@ -7,14 +7,16 @@ import asyncio
 import aiohttp
 import logging
 import traceback
-
 import re
+
 from bs4 import BeautifulSoup
 from bs4.element import SoupStrainer
 
 from F6._BasePeriod import _BasePeriod
 from F2.Message import Message,MessageSegment
 from F4.APIParamsGetter import APIParamsGetter
+
+from utils.utils import get_settings
 
 
 class _SolidotItem(BaseModel):
@@ -27,15 +29,15 @@ class _SolidotItem(BaseModel):
 
 class SolidotSpider(_BasePeriod):
     url = "https://www.solidot.org/index.rss"
-    repeat_time = 1200
+    repeat_time = 600
     item_dict : Dict[int, _SolidotItem]
 
     @classmethod
     async def create(cls):
         logging.info("(F6.SolidotSpider, create) create instance started.")
         self = SolidotSpider()
-        # self.item_dict = await cls.get_items_dict()
-        self.item_dict = {}
+        self.item_dict = await cls.get_items_dict()
+        # self.item_dict = {}
         logging.info("(F6.SolidotSpider) create instance ended.")
         return self
 
@@ -88,16 +90,6 @@ class SolidotSpider(_BasePeriod):
 
     @staticmethod
     def get_message_by_item(item: _SolidotItem) -> Message:
-        # return Message.init_with_segments(
-        #     MessageSegment.text(item.title),
-        #     MessageSegment.text('\n\n'),
-        #     MessageSegment.text(item.pubdate+'\n'),
-        #     MessageSegment.text(item.link),
-        #     MessageSegment.text('\n\n'),
-        #     MessageSegment.text(item.description),
-        #     MessageSegment.text('\n\n'),
-        #     MessageSegment.text("(来源：Solidot)")
-        # )
         return Message.init_with_segments(
             MessageSegment.text(
                 item.title + '\n\n' + item.pubdate + '\n' + item.link + '\n\n' + item.description + '\n\n'
@@ -113,15 +105,37 @@ class SolidotSpider(_BasePeriod):
         return nd
 
     async def main(self, *, bot):
+        enable, std = get_settings("SolidotSpider", "enable")
+        if not enable:
+            logging.info("(F6.SolidotSpider, main) SolidotSpider is disable.")
+            return
+
+        logging.info("(F6.SolidotSpider, main) SolidotSpider is enable.")
+        group_list = get_settings("SolidotSpider", "group_list", std=std)[0]
+        user_list = get_settings("SolidotSpider", "user_list", std=std)[0]
+        logging.info(f"(F6.SolidotSpider, main) group_list: {group_list} , user_list: {user_list}. ")
+
         nd = await self.get_items_dict()
         diff_dict = self.get_diff_items_dict(nd)
-        for k,v in diff_dict.items():
-            await bot.call_api(await APIParamsGetter.get_send_apiparams_by_user_id(
-                message=self.get_message_by_item(v),
-                user_id=1041159637,
-                bot=bot
-            ))
+        for k, v in diff_dict.items():
+            for u in user_list:
+                await bot.call_api(await APIParamsGetter.get_send_apiparams_by_user_id(
+                    message=self.get_message_by_item(v),
+                    user_id=int(u),
+                    bot=bot
+                ))
+                await asyncio.sleep(5)
+
+            for g in group_list:
+                await bot.call_api(await APIParamsGetter.get_send_apiparams_by_group_id(
+                    message=self.get_message_by_item(v),
+                    group_id=int(g),
+                    bot=bot
+                ))
+                await asyncio.sleep(5)
+
             await asyncio.sleep(5)
+
         self.item_dict.update(diff_dict)
 
     async def enter_loop(self, *, bot):
@@ -130,4 +144,4 @@ class SolidotSpider(_BasePeriod):
             logging.info(f"(F6.SolidotSpider, enter_loop) Main done, start to wait for {self.repeat_time} sec.")
             await asyncio.sleep(self.repeat_time)
 
-
+# TODO: 当字典大小太大时清除过时的消息
