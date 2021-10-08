@@ -55,7 +55,7 @@ async def lcm(regular_message: Message.Message, event:Event.MessageEvent, *, bot
     """
     x = int(regular_message[1].data['text'])
     y = int(regular_message[2].data['text'])
-    ans = math.lcm(x, y)
+    ans = sympy.lcm(x, y)
 
     return Message.Message.init_with_segments(
         Message.MessageSegment.text(str(ans))

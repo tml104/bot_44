@@ -44,7 +44,6 @@ async def h(regular_message: Message.Message, event:Event.MessageEvent, *, bot) 
         )
 
 
-
 async def hey(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
     """
         使Bot回复一段颜文字。
