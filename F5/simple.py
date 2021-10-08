@@ -12,17 +12,37 @@ import F2.Event as Event
 import F2.Message as Message
 import utils.utils as utils
 
-import sympy
-
 
 async def h(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
     """
         显示所有命令的帮助信息。
+
+        格式：h [name]
+            name: 要查询的命令名字。缺省时，将会列出所有loaded的命令。
     """
+
     d:dict = bot.cmd_loader.command_dict
-    return Message.Message.init_with_segments(*[
-        Message.MessageSegment.text(f"{fun_name}: {fun.__doc__}\n") for fun_name, fun in d.items()
-    ])
+    if len(regular_message) == 1:
+        # return Message.Message.init_with_segments(*[
+        #     Message.MessageSegment.text(f"{fun_name}: {fun.__doc__}\n") for fun_name, fun in d.items()
+        # ])
+        return Message.Message.init_with_segments(
+            Message.MessageSegment.text("所有命令："), *[
+                Message.MessageSegment.text(f"{fun_name}, ") for fun_name in d.keys()
+            ]
+        )
+    elif len(regular_message) == 2:
+        fun_name = regular_message[1].data['text']
+        fun = d.get(fun_name)
+        if fun is None:
+            doc_str = "没有这条命令. 使用不带参数的 h 命令来查询所有命令."
+        else:
+            doc_str = fun.__doc__ if fun.__doc__ else "这条命令没有说明文档."
+
+        return Message.Message.init_with_segments(
+            Message.MessageSegment.text(doc_str)
+        )
+
 
 
 async def hey(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
@@ -31,17 +51,6 @@ async def hey(regular_message: Message.Message, event:Event.MessageEvent, *, bot
     """
     return Message.Message.init_with_segments(
         Message.MessageSegment.text("ヽ(✿ﾟ▽ﾟ)ノ")
-    )
-
-
-async def isprime(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
-    """
-        判断一个数是否是质数。
-    """
-    n = int(regular_message[1].data['text'])
-
-    return Message.Message.init_with_segments(
-        Message.MessageSegment.text("isprime: True" if sympy.isprime(n) else "isprime: False")
     )
 
 
