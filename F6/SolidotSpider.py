@@ -43,13 +43,20 @@ class SolidotSpider(_BasePeriod):
 
     @staticmethod
     def _process_cdata_string(cdata: str) -> str:
+        """
+        从cdata中找出带有链接的字符串，然后提取链接中的纯文本返回
+        2021.10.26新增：去除<br>标签，使用replace函数实现
+
+        :param cdata:
+        :return:
+        """
         def _remove_link(matchobj: re.Match) -> str:
             # url = matchobj.group(1)
             content_str = matchobj.group(2)
             return f"{content_str}"
 
         p = re.compile(r"<a href=\"(.*?)\">(.*?)</a>")
-        return p.sub(_remove_link, cdata)
+        return p.sub(_remove_link, cdata).replace("<br>", "")
 
     @staticmethod
     def _get_sid_from_link(link: str) -> int:
@@ -58,6 +65,11 @@ class SolidotSpider(_BasePeriod):
 
     @staticmethod
     async def get_items_dict():
+        """
+        爬取 https://www.solidot.org/index.rss 上的rss信息
+
+        :return:
+        """
         logging.info("(F6.SolidotSpider, get_items_dict) get_items_dict started.")
         d = {}
 
@@ -70,6 +82,8 @@ class SolidotSpider(_BasePeriod):
 
         soup = BeautifulSoup(resp_text, "xml", parse_only=SoupStrainer("item"))
         item_ls = soup.find_all("item")
+
+        # 提取rss中item标签下信息
         for item in item_ls:
             title = SolidotSpider._process_cdata_string(item.title.string)
             description = SolidotSpider._process_cdata_string(item.description.string)
@@ -105,6 +119,12 @@ class SolidotSpider(_BasePeriod):
         return nd
 
     async def main(self, *, bot):
+        """
+        向所有订阅的群组或人推送消息
+
+        :param bot:
+        :return:
+        """
         enable, std = get_settings("SolidotSpider", "enable")
         if not enable:
             logging.info("(F6.SolidotSpider, main) SolidotSpider is disable.")
@@ -115,6 +135,7 @@ class SolidotSpider(_BasePeriod):
         user_list = get_settings("SolidotSpider", "user_list", std=std)[0]
         logging.info(f"(F6.SolidotSpider, main) group_list: {group_list} , user_list: {user_list}. ")
 
+        # 向所有订阅的群组或人推送消息
         nd = await self.get_items_dict()
         diff_dict = self.get_diff_items_dict(nd)
         for k, v in diff_dict.items():
@@ -139,6 +160,12 @@ class SolidotSpider(_BasePeriod):
         self.item_dict.update(diff_dict)
 
     async def enter_loop(self, *, bot):
+        """
+        main函数事件循环
+
+        :param bot:
+        :return:
+        """
         while True:
             await self.main(bot=bot)
             logging.info(f"(F6.SolidotSpider, enter_loop) Main done, start to wait for {self.repeat_time} sec.")
