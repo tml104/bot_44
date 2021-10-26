@@ -100,7 +100,15 @@ class Bot:
             user_id=1041159637,
             bot=self
         )
+
+        res2 = await APIParamsGetter.get_send_apiparams_by_group_id(
+            message=Message.init_with_segments(MessageSegment.text("bot_44 准备就绪.")),
+            group_id=491959457,
+            bot=self
+        )
+
         await self.call_api(res)
+        await self.call_api(res2)
 
     async def receiver_loop(self):
         """
