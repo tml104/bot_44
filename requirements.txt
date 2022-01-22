@@ -2,3 +2,5 @@ pydantic==1.8.2
 aiohttp==3.7.4.post0
 sympy==1.8
 lxml==4.6.3
+pygtrie=2.4.2
+beautifulsoup4

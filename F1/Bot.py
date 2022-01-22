@@ -135,7 +135,7 @@ class Bot:
 
     async def enter_loop(self):
         """
-        启动监听事件循环
+        启动监听事件循环（启动bot的入口）
 
         :return:
         """
@@ -148,7 +148,7 @@ class Bot:
 
         period_task = asyncio.create_task(self.period_loop())
         await self.receiver_loop()
-        await period_task #?
+        await period_task #? ： 这个其实在bot被强制关闭前没啥用，因为上一句话的await始终阻塞
         # logging.info("(F1.Bot) Bot successfully created receiver task.")
 
     async def close(self):
