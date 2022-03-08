@@ -45,4 +45,4 @@ class CommandLoader:
         return d
 
     def reload(self):
-        self.command_dict = CommandLoader.load_commands()
+        self.command_dict = self.load_commands()

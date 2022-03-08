@@ -29,6 +29,9 @@ class PeriodLoader:
         self.class_dict = self.load_classes()
 
     def load_classes(self):
+        """
+            将base path下的所有模块装入字典中，返回该字典
+        """
         logging.info("(F1.PeriodLoader, load_classes) PeriodLoader load started.")
         d = {}
         for module_file in os.listdir(self.base_path):
@@ -50,7 +53,7 @@ class PeriodLoader:
         return d
 
     def reload(self):
-        self.class_dict = PeriodLoader.load_classes()
+        self.class_dict = self.load_classes()
 
 
 '''

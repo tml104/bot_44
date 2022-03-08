@@ -16,6 +16,7 @@ if __name__ == '__main__':
     qqid = config_dict['qqid']
     cmd_loader_base_path = config_dict['cmd_loader_base_path']
     period_loader_path = config_dict['period_loader_path']
+    chromedrive_path = config_dict['chromedrive_path']
     logging.info(f"config args: {ws_url}, {ws_url2}, {qqid}, {cmd_loader_base_path}")
 
     bot = Bot.Bot(
@@ -23,7 +24,8 @@ if __name__ == '__main__':
         ws_url2,
         qqid,
         cmd_loader_base_path,
-        period_loader_path
+        period_loader_path,
+        chromedrive_path
     )
     loop = asyncio.get_event_loop()
     loop.run_until_complete(bot.enter_loop())

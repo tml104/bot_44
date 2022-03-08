@@ -24,7 +24,7 @@ from F4.APIParamsGetter import APIParamsGetter
 '''
 
 class Bot:
-    def __init__(self, ws_url:str, ws_url2:str, qqid:str, cmd_loader_base_path:str ,period_loader_path:str ):
+    def __init__(self, ws_url:str, ws_url2:str, qqid:str, cmd_loader_base_path:str ,period_loader_path:str, chromedrive_path:str):
         """
         构造Bot对象，用于启动事件循环接受事件。
 
@@ -38,6 +38,7 @@ class Bot:
         self.ws_url = ws_url
         self.ws_url2 = ws_url2
         self.qqid = qqid
+        self.chromedrive_path = chromedrive_path
 
     @staticmethod
     async def __json_to_event(j: Dict) -> Event.Event:

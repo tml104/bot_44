@@ -62,6 +62,8 @@ async def solidot(regular_message: Message.Message, event:Event.MessageEvent, *,
         solidot DY: 将当前群/用户加入订阅列表
         solidot TD: 将当前群/用户移除订阅列表
         solidot list: 列出所有正在订阅的群/用户
+        solidot news: 列出当前能获取到的所有新闻
+        solidot news sid: 对应新闻sid的详情
     """
     subcmd = regular_message[1].data['text']
 
@@ -75,7 +77,7 @@ async def solidot(regular_message: Message.Message, event:Event.MessageEvent, *,
         solidot_spider["enable"] = True
         change_flag = True
         res = "Solidot 功能开启."
-    elif subcmd == "enable":
+    elif subcmd == "disable":
         solidot_spider["enable"] = False
         change_flag = True
         res = "Solidot 功能关闭."
@@ -105,9 +107,49 @@ async def solidot(regular_message: Message.Message, event:Event.MessageEvent, *,
                 user_list.remove(event.user_id)
             res = f"退订用户:{event.user_id}"
 
+    elif subcmd == "news":
+        import F6.SolidotSpider as sp
+        news_dict = await sp.SolidotSpider.get_items_dict()
+
+        try:
+            sid = int(regular_message[2].data['text'])
+
+            return sp.SolidotSpider.get_message_by_item(
+                news_dict[sid]
+            )
+
+        except Exception as e:
+            msg_list = Message.Message.init_with_segments()
+
+            for sid,v in news_dict.items():
+                msg_list.append(
+                    Message.MessageSegment.text(
+                        f"{sid}: {v.title}\n"
+                    )
+                )
+
+        return msg_list        
+
+
     if change_flag:
         json.dump(std, open("./settings.json", "w"))
 
     return Message.Message.init_with_segments(
         Message.MessageSegment.text(res)
+    )
+
+
+async def reload(regular_message: Message.Message, event:Event.MessageEvent, *, bot) -> Message.Message:
+    """
+        热重载Bot的函数字典。
+
+        格式： reload
+        - 注意：此为消耗性能的命令，可能需要用个鉴权什么的
+    """
+
+    bot.cmd_loader.reload()
+    bot.period_loader.reload()
+
+    return Message.Message.init_with_segments(
+        Message.MessageSegment.text("Reload完了")
     )
